@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {
-    View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert, ScrollView, ImageBackground
+    View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert, ScrollView, ImageBackground, Platform
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import config from '../config';
 
 const tiposUsuarios = [
@@ -18,7 +19,8 @@ export default function Cadastro({ navigation }) {
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [nomeMarca, setNomeMarca] = useState('');
     const [telefone, setTelefone] = useState('');
-    const [dataNascimento, setDataNascimento] = useState('');
+    const [dataNascimento, setDataNascimento] = useState(null);
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [cep, setCep] = useState('');
     const [categoria, setCategoria] = useState('');
 
@@ -26,36 +28,49 @@ export default function Cadastro({ navigation }) {
     const validarTelefone = (tel) => /^[0-9]{10,11}$/.test(tel);
     const validarSenha = (senha) => /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}":;'?/>,.<]).{8,}$/.test(senha);
 
+    const formatDateString = (date) => {
+        if (!date) return null;
+        // Formata para DD-MM-AAAA
+        return date.toLocaleDateString('pt-BR'); // Exemplo: 23/09/2025
+    };
+
+
+    const onChangeDate = (event, selectedDate) => {
+        setShowDatePicker(Platform.OS === 'ios');
+        if (selectedDate) {
+            setDataNascimento(selectedDate);
+        }
+    };
+
     const handleCadastrar = async () => {
-        if (!nome || !email || !senha || !telefone || !dataNascimento || !cep) {
+        if (!nome.trim() || !email.trim() || !senha.trim() || !telefone.trim() || !dataNascimento || !cep.trim()) {
             return Alert.alert('Erro', 'Todos os campos são obrigatórios!');
         }
-        if (!validarEmail(email)) {
+        if (!validarEmail(email.trim())) {
             return Alert.alert('Erro', 'Digite um e-mail válido!');
         }
         if (!validarSenha(senha)) {
             return Alert.alert('Erro', 'A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula e um caractere especial!');
         }
-        if (!validarTelefone(telefone)) {
+        if (!validarTelefone(telefone.trim())) {
             return Alert.alert('Erro', 'O telefone deve ter 10 ou 11 dígitos numéricos!');
         }
-        if (tipo === '2' && !categoria) {
+        if (tipo === '2' && !categoria.trim()) {
             return Alert.alert('Erro', 'Selecione uma categoria para fornecedor!');
         }
 
         const cargo = tipo;
-        const parts = dataNascimento.split('-');
-        const dataFormatada = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : dataNascimento;
+        const dataFormatada = dataNascimento ? formatDateString(dataNascimento) : null;
 
         const dados = {
-            nome,
-            email,
+            nome: nome.trim(),
+            email: email.trim(),
             senha,
-            telefone,
+            telefone: telefone.trim(),
             data_nascimento: dataFormatada,
-            cep,
-            categoria: tipo === '2' ? categoria : null,
-            nome_marca: nomeMarca,
+            cep: cep.trim(),
+            categoria: tipo === '2' ? categoria.trim() : null,
+            nome_marca: nomeMarca.trim() || null,
             cargo
         };
 
@@ -74,7 +89,8 @@ export default function Cadastro({ navigation }) {
                 const erro = await resposta.json();
                 Alert.alert('Erro', erro.error || 'Erro no cadastro');
             }
-        } catch {
+        } catch (error) {
+            console.error(error);
             Alert.alert('Erro', 'Falha na comunicação com o servidor.');
         }
     };
@@ -85,7 +101,7 @@ export default function Cadastro({ navigation }) {
             style={styles.background}
             resizeMode="cover"
         >
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
                 <View style={styles.formulario}>
                     <Text style={styles.titulo}>Cadastre-se</Text>
                     <Image source={require('../assets/imagens/logoicon.png')} style={styles.logoCanto} />
@@ -122,21 +138,33 @@ export default function Cadastro({ navigation }) {
                             />
                         </TouchableOpacity>
                     </View>
+                    <TextInput placeholder="Telefone" keyboardType="phone-pad" value={telefone} onChangeText={setTelefone} style={styles.input} />
 
-                    {tipo === '1' && (
-                        <TextInput placeholder="Nome da marca (Opcional)" value={nomeMarca} onChangeText={setNomeMarca} style={styles.input} />
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.input, styles.datePickerTouchable]}>
+                        <Text style={{ color: dataNascimento ? 'black' : '#888', fontSize: 18 }}>
+                            {dataNascimento ? dataNascimento.toLocaleDateString('pt-BR') : 'Data de nascimento'}
+                        </Text>
+                    </TouchableOpacity>
+
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={dataNascimento || new Date()}
+                            mode="date"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            onChange={onChangeDate}
+                            maximumDate={new Date()}
+                            locale="pt-BR"  // <-- Aqui o locale PT-BR
+                        />
+
                     )}
 
-                    {(tipo === '2' || tipo === '3') && (
-                        <>
-                            <TextInput placeholder="Telefone" keyboardType="phone-pad" value={telefone} onChangeText={setTelefone} style={styles.input} />
-                            <TextInput placeholder="Data de nascimento (aaaa-mm-dd)" value={dataNascimento} onChangeText={setDataNascimento} style={styles.input} />
-                            <TextInput placeholder="CEP" value={cep} onChangeText={setCep} style={styles.input} />
+                    <TextInput placeholder="CEP" value={cep} onChangeText={setCep} style={styles.input} />
 
-                            {tipo === '2' && (
-                                <TextInput placeholder="Categoria do fornecedor" value={categoria} onChangeText={setCategoria} style={styles.input} />
-                            )}
-                        </>
+                    {tipo === '2' && (
+                        <TextInput placeholder="Nome da marca (Opcional)" value={nomeMarca} onChangeText={setNomeMarca} style={styles.input} />
+                    )}
+                    {tipo === '2' && (
+                        <TextInput placeholder="Categoria do fornecedor" value={categoria} onChangeText={setCategoria} style={styles.input} />
                     )}
 
                     <TouchableOpacity style={styles.botaoCadastrar} onPress={handleCadastrar}>
@@ -158,6 +186,10 @@ const styles = StyleSheet.create({
     background: {
         flex: 1,
         justifyContent: 'center'
+    },
+    scrollContainer: {
+        paddingVertical: 40,
+        paddingHorizontal: 0,
     },
     formulario: {
         width: 400,
@@ -192,8 +224,9 @@ const styles = StyleSheet.create({
     },
     tiposContainer: {
         flexDirection: 'row',
-        gap: 20,
         marginBottom: 20,
+        justifyContent: 'space-around',
+        width: '100%'
     },
     tipoBotao: {
         borderWidth: 1,
@@ -225,6 +258,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         backgroundColor: '#F4F2EE',
         marginBottom: 5,
+        justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     senhaContainer: {
         width: '88%',
@@ -264,5 +300,17 @@ const styles = StyleSheet.create({
         marginTop: 10,
         color: '#007BFF',
         textDecorationLine: 'underline',
+    },
+    datePickerTouchable: {
+        justifyContent: 'center',
+        height: 48,
+        paddingLeft: 10,
+        backgroundColor: '#F4F2EE',
+        borderRadius: 3,
+        borderWidth: 1,
+        borderColor: 'black',
+        marginBottom: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 });
