@@ -1,20 +1,21 @@
-import React from 'react';
+import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './screens/Login';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-const Stack = createStackNavigator();
+import Login from './screens/Login';
+import Cadastro from './screens/Cadastro';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login">
-                <Stack.Screen
-                    name="Login"
-                    component={Login}
-                    options={{ headerShown: false }}
-                />
-                {/* Adicione outras telas aqui */}
+            <Stack.Navigator
+                initialRouteName="Login"
+                screenOptions={{ headerShown: false }}
+            >
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Cadastro" component={Cadastro} />
             </Stack.Navigator>
         </NavigationContainer>
     );

@@ -4,261 +4,205 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    ImageBackground,
     Image,
     StyleSheet,
     Alert,
-    Dimensions,
-    ScrollView
+    ImageBackground
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width, height } = Dimensions.get('window');
+// Altere o caminho das imagens conforme sua pasta local do projeto
+const BACKGROUND_IMAGE = require('../assets/imagens/background2.png');
+const LOGO_IMAGE = require('../assets/imagens/logoicon.png');
+const EYE_OPEN = { uri: "https://cdn-icons-png.flaticon.com/512/2767/2767149.png" };
+const EYE_CLOSED = { uri: "https://cdn-icons-png.flaticon.com/512/2767/2767146.png" };
 
-const LoginScreen = ({ navigation }) => {
+export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+    // Substitua abaixo pelos caminhos das suas imagens no projeto
 
     const handleLogin = async () => {
-        // Validação básica
-        if (!email.trim() || !senha.trim()) {
+        if (!email || !senha) {
             Alert.alert('Erro!', 'Por favor, preencha todos os campos!');
             return;
         }
-
-        const dados = {
-            email: email.trim(),
-            senha: senha.trim()
-        };
-
         try {
-            const response = await fetch('http://10.92.3.202:5000/login', {
+            const resposta = await fetch('http://10.92.3.172:5000/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(dados),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha })
             });
+            const dados = await resposta.json();
+            const usuario = dados.usuarios || dados.user || dados;
 
-            const retorno = await response.json();
-
-            if (response.ok) {
-                console.log('Resposta do servidor:', retorno);
-
-                const usuario = retorno.usuario || retorno.user || retorno;
-
-                if (!usuario || !retorno.token) {
-                    Alert.alert('Erro!', 'Não foi possível recuperar os dados do usuário.');
-                    return;
-                }
-
-                // Salvar dados no AsyncStorage
-                await AsyncStorage.setItem('token', retorno.token || '');
-                await AsyncStorage.setItem('nome', usuario.nome || '');
-                await AsyncStorage.setItem('email', usuario.email || '');
-                await AsyncStorage.setItem('telefone', usuario.telefone || '');
-                await AsyncStorage.setItem('id_usuario', usuario.id_usuario?.toString() || '');
-                await AsyncStorage.setItem('cargo', usuario.cargo || '');
-
-                Alert.alert('Sucesso!', 'Login realizado com sucesso!', [
-                    {
-                        text: 'OK',
-                        onPress: () => {
-                            if (usuario.cargo === 'adm') {
-                                navigation.navigate('HomeAdmin');
-                            } else {
-                                navigation.navigate('Home');
-                            }
-                        }
-                    }
-                ]);
-            } else {
-                Alert.alert('Erro!', retorno.error || 'Erro ao tentar fazer login.');
+            if (!usuario || !usuario.token) {
+                Alert.alert('Erro!', 'Não foi possível recuperar os dados do usuário.');
+                return;
             }
-        } catch (error) {
-            console.error('Erro na requisição:', error);
-            Alert.alert('Erro!', 'Erro de conexão. Verifique sua internet.');
+            // Salvar usuário no asyncStorage se quiser persistência
+            // AsyncStorage.setItem('token', usuario.token);
+
+            Alert.alert('Login bem-sucedido!');
+            // Troque a navegação conforme a sua estrutura do app
+            if (usuario.tipo === 'adm') {
+                navigation.navigate('HomeAdmin'); // ou use navigation.replace(...)
+            } else {
+                navigation.navigate('HomeLogado');
+            }
+        } catch (erro) {
+            Alert.alert('Erro!', erro.message || 'Erro ao tentar fazer login.');
         }
     };
 
     return (
         <ImageBackground
-            source={{ uri: 'https://your-background-image-url.com/background2.png' }} // Substitua pela sua imagem
-            style={styles.backgroundImage}
+            source={BACKGROUND_IMAGE}
+            style={styles.background}
             resizeMode="cover"
         >
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.principal}>
-                    <View style={styles.formulario}>
+            <View style={styles.formulario}>
+                <Text style={styles.titulo}>Login</Text>
+                <Image source={LOGO_IMAGE} style={styles.logoCanto} />
+                <TextInput
+                    placeholder="E-mail"
+                    value={email}
+                    onChangeText={setEmail}
+                    style={styles.input}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                />
+                <View style={styles.senhaContainer}>
+                    <TextInput
+                        placeholder="Senha"
+                        value={senha}
+                        onChangeText={setSenha}
+                        style={styles.inputSenha}
+                        secureTextEntry={!mostrarSenha}
+                    />
+                    <TouchableOpacity
+                        onPress={() => setMostrarSenha(!mostrarSenha)}
+                        style={styles.iconeSenha}
+                        hitSlop={12}
+                    >
                         <Image
-                            source={{ uri: 'https://your-logo-url.com/logo-preta.png' }} // Substitua pelo seu logo
-                            style={styles.logoCanto}
-                            resizeMode="contain"
+                            source={mostrarSenha ? EYE_OPEN : EYE_CLOSED}
+                            style={{ width: 24, height: 24 }}
                         />
-
-                        <Text style={styles.titulo}>Login</Text>
-
-                        <View style={styles.inputContainer}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="E-mail"
-                                placeholderTextColor="#666"
-                                value={email}
-                                onChangeText={setEmail}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                            />
-                        </View>
-
-                        <View style={styles.inputContainer}>
-                            <TextInput
-                                style={[styles.input, styles.inputWithIcon]}
-                                placeholder="Senha"
-                                placeholderTextColor="#666"
-                                value={senha}
-                                onChangeText={setSenha}
-                                secureTextEntry={!showPassword}
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                            />
-                            <TouchableOpacity
-                                style={styles.eyeIcon}
-                                onPress={() => setShowPassword(!showPassword)}
-                            >
-                                <Ionicons
-                                    name={showPassword ? 'eye-off' : 'eye'}
-                                    size={20}
-                                    color="#666"
-                                />
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity style={styles.botaoLogin} onPress={handleLogin}>
-                            <Text style={styles.botaoLoginText}>Entrar</Text>
-                        </TouchableOpacity>
-
-                        <View style={styles.cadastroContainer}>
-                            <Text style={styles.cadastroText}>Não possui uma conta? </Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
-                                <Text style={styles.cadastroLink}>Cadastre-se</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    </TouchableOpacity>
                 </View>
-            </ScrollView>
+
+                <TouchableOpacity style={styles.botaoLogin} onPress={handleLogin}>
+                    <Text style={styles.textoBotaoLogin}>Entrar</Text>
+                </TouchableOpacity>
+                <Text style={styles.cadastro}>
+                    Não possui uma conta?{' '}
+                    <Text
+                        style={{ color: '#007BFF', textDecorationLine: 'underline' }}
+                        onPress={() => navigation.navigate('Cadastro')}
+                    >
+                        Cadastre-se
+                    </Text>
+                </Text>
+            </View>
         </ImageBackground>
     );
-};
+}
 
 const styles = StyleSheet.create({
-    backgroundImage: {
+    background: {
         flex: 1,
-        width: '100%',
-        height: '100%',
-    },
-    scrollContainer: {
-        flexGrow: 1,
-    },
-    principal: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 40,
+        justifyContent: 'center'
     },
     formulario: {
-        width: width * 0.9,
-        maxWidth: 400,
+        width: 400,        // aumentei de 340 para 400
+        alignSelf: 'center',
         backgroundColor: 'white',
         borderRadius: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
+        alignItems: 'center',
+        paddingVertical: 32,  // aumentei o padding vertical
+        paddingHorizontal: 24, // aumentei o padding horizontal
+        gap: 20,
+        elevation: 6, // sombra (Android)
+        shadowColor: '#000', // sombra (iOS)
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 10,
-        elevation: 5,
-        paddingHorizontal: 30,
-        paddingVertical: 40,
-        alignItems: 'center',
-        position: 'relative',
-    },
-    logoCanto: {
-        width: 80,
-        height: 60,
-        position: 'absolute',
-        top: 15,
-        right: 15,
-    },
+        },
+
     titulo: {
         fontFamily: 'serif',
+        fontWeight: '400',
         fontSize: 28,
         color: 'black',
-        marginBottom: 30,
-        marginTop: 20,
+        paddingTop: 20,
     },
-    inputContainer: {
-        width: '100%',
-        marginBottom: 20,
-        position: 'relative',
+    logoCanto: {
+        width: 115,
+        height: 60,
+        resizeMode: 'contain',
+        alignSelf: 'flex-end',
+        position: 'absolute',
+        top: 20,
+        right: 20,
     },
     input: {
-        width: '100%',
-        height: 45,
-        borderWidth: 1,
+        width: '88%',
+        height: 48,      // antes 40
         borderColor: 'black',
+        borderWidth: 1,
         borderRadius: 3,
-        paddingHorizontal: 15,
-        fontSize: 14,
+        paddingLeft: 10,
         fontFamily: 'serif',
-        backgroundColor: 'white',
+        fontSize: 18,    // antes 16
+        backgroundColor: '#F4F2EE',
+        marginBottom: 5,
     },
-    inputWithIcon: {
-        paddingRight: 45,
-    },
-    eyeIcon: {
-        position: 'absolute',
-        right: 15,
-        top: 12,
-        padding: 5,
-    },
-    botaoLogin: {
-        width: '100%',
-        height: 50,
-        backgroundColor: '#FFC9D6', // rosa-médio-escuro
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: 'black',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 10,
-        marginBottom: 20,
-    },
-    botaoLoginText: {
-        color: 'white',
-        fontSize: 20,
-        fontFamily: 'serif',
-        fontWeight: '400',
-    },
-    cadastroContainer: {
+
+    senhaContainer: {
+        width: '88%',
         flexDirection: 'row',
         alignItems: 'center',
+        borderColor: 'black',
+        borderWidth: 1,
+        borderRadius: 3,
+        backgroundColor: '#F4F2EE',
     },
-    cadastroText: {
-        fontSize: 14,
-        color: 'black',
-        fontWeight: '500',
+    inputSenha: {
+        flex: 1,
+        paddingLeft: 10,
+        fontFamily: 'serif',
+        fontSize: 18,
+        backgroundColor: '#F4F2EE',
+        borderWidth: 0,  // sem borda aqui!
     },
-    cadastroLink: {
-        fontSize: 14,
-        color: '#007BFF',
+
+    iconeSenha: {
+        marginRight: 10,
+    },
+    botaoLogin: {
+        width: '88%',
+        height: 50,
+        borderRadius: 10,
+        backgroundColor: '#FFC9D6',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 12,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOpacity: 0.20,
+        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    textoBotaoLogin: {
+        color: 'white',
+        fontFamily: 'serif',
+        fontSize: 20,
+    },
+    cadastro: {
         fontWeight: '500',
-        textDecorationLine: 'underline',
+        marginTop: 10,
+        fontFamily: 'serif',
+        fontSize: 16,
     },
 });
-
-export default LoginScreen;
