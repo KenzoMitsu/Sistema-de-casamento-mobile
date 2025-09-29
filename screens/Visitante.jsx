@@ -39,7 +39,7 @@ export default function VisitanteScreen({ navigation }) {
             <ScrollView>
                 {/* A ScrollView agora contém todo o conteúdo que rola */}
                 <ImageBackground
-                    source={require('../assets/imagens/hero-background.jpg')}
+                    source={require('../assets/imagens/background.png')}
                     style={styles.heroSection}
                     resizeMode="cover"
                 >
