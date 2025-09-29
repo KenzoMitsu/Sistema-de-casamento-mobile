@@ -5,13 +5,16 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import config from '../config';
 
+
 const tiposUsuarios = [
     { label: 'Noivo(a)', value: '1' },
     { label: 'Fornecedor(a)', value: '2' },
     { label: 'Cerimonialista', value: '3' }
 ];
 
+
 export default function Cadastro({ navigation }) {
+    // --- States ---
     const [tipo, setTipo] = useState('1');
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
@@ -25,15 +28,21 @@ export default function Cadastro({ navigation }) {
     const [categoria, setCategoria] = useState('');
 
     const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email);
-    const validarTelefone = (tel) => /^[0-9]{10,11}$/.test(tel);
+
+    const validarTelefone = (tel) => /^\d{10,11}$/.test(tel.replace(/\D/g, ''));
+
     const validarSenha = (senha) => /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}":;'?/>,.<]).{8,}$/.test(senha);
+    const validarCEP = (cep) => /^\d{8}$/.test(cep.replace(/\D/g, ''));
+
 
     const formatDateString = (date) => {
         if (!date) return null;
-        // Formata para DD-MM-AAAA
-        return date.toLocaleDateString('pt-BR'); // Exemplo: 23/09/2025
-    };
 
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${year}-${month}-${day}`;
+    };
 
     const onChangeDate = (event, selectedDate) => {
         setShowDatePicker(Platform.OS === 'ios');
@@ -42,22 +51,33 @@ export default function Cadastro({ navigation }) {
         }
     };
 
+
     const handleCadastrar = async () => {
-        if (!nome.trim() || !email.trim() || !senha.trim() || !telefone.trim() || !dataNascimento || !cep.trim()) {
-            return Alert.alert('Erro', 'Todos os campos são obrigatórios!');
+        const telLimpo = telefone.replace(/\D/g, '');
+        const cepLimpo = cep.replace(/\D/g, '');
+
+
+        if (!nome.trim() || !email.trim() || !senha.trim() || !telLimpo || !dataNascimento || !cepLimpo) {
+            return Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos!');
         }
+
+
         if (!validarEmail(email.trim())) {
             return Alert.alert('Erro', 'Digite um e-mail válido!');
         }
-        if (!validarSenha(senha)) {
-            return Alert.alert('Erro', 'A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula e um caractere especial!');
-        }
-        if (!validarTelefone(telefone.trim())) {
+        if (!validarTelefone(telLimpo)) {
             return Alert.alert('Erro', 'O telefone deve ter 10 ou 11 dígitos numéricos!');
+        }
+        if (!validarCEP(cepLimpo)) {
+            return Alert.alert('Erro', 'O CEP deve ter 8 dígitos numéricos!');
+        }
+        if (!validarSenha(senha)) {
+            return Alert.alert('Erro', 'A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula e um caractere especial! (Ex: Abcde!@#)');
         }
         if (tipo === '2' && !categoria.trim()) {
             return Alert.alert('Erro', 'Selecione uma categoria para fornecedor!');
         }
+
 
         const cargo = tipo;
         const dataFormatada = dataNascimento ? formatDateString(dataNascimento) : null;
@@ -66,13 +86,14 @@ export default function Cadastro({ navigation }) {
             nome: nome.trim(),
             email: email.trim(),
             senha,
-            telefone: telefone.trim(),
+            telefone: telLimpo,
             data_nascimento: dataFormatada,
-            cep: cep.trim(),
+            cep: cepLimpo,
             categoria: tipo === '2' ? categoria.trim() : null,
             nome_marca: nomeMarca.trim() || null,
             cargo
         };
+
 
         try {
             const resposta = await fetch(`${config.IP_LOCAL}/usuario`, {
@@ -80,20 +101,22 @@ export default function Cadastro({ navigation }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)
             });
-
             if (resposta.ok) {
+
                 Alert.alert('Sucesso', 'Cadastro realizado com sucesso!', [
                     { text: 'Ok', onPress: () => navigation.navigate('Login') }
                 ]);
             } else {
+
                 const erro = await resposta.json();
-                Alert.alert('Erro', erro.error || 'Erro no cadastro');
+                Alert.alert('Erro', erro.error || 'Erro no cadastro. Verifique os dados e tente novamente.');
             }
         } catch (error) {
             console.error(error);
-            Alert.alert('Erro', 'Falha na comunicação com o servidor.');
+            Alert.alert('Erro', 'Falha na comunicação com o servidor. Verifique sua conexão ou o IP do servidor.');
         }
     };
+
 
     return (
         <ImageBackground
@@ -121,11 +144,11 @@ export default function Cadastro({ navigation }) {
                     </View>
 
                     <TextInput placeholder="Seu nome" value={nome} onChangeText={setNome} style={styles.input} />
-                    <TextInput placeholder="E-mail" keyboardType="email-address" value={email} onChangeText={setEmail} style={styles.input} />
+                    <TextInput placeholder="E-mail" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} style={styles.input} />
 
                     <View style={styles.senhaContainer}>
                         <TextInput
-                            placeholder="Senha"
+                            placeholder="Senha (Mín. 8 caracteres, 1 maiúsculo, 1 especial)"
                             secureTextEntry={!mostrarSenha}
                             value={senha}
                             onChangeText={setSenha}
@@ -138,7 +161,16 @@ export default function Cadastro({ navigation }) {
                             />
                         </TouchableOpacity>
                     </View>
-                    <TextInput placeholder="Telefone" keyboardType="phone-pad" value={telefone} onChangeText={setTelefone} style={styles.input} />
+
+
+                    <TextInput
+                        placeholder="Telefone (DDD + Número, apenas números)"
+                        keyboardType="phone-pad"
+                        value={telefone}
+                        onChangeText={setTelefone}
+                        maxLength={11}
+                        style={styles.input}
+                    />
 
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.input, styles.datePickerTouchable]}>
                         <Text style={{ color: dataNascimento ? 'black' : '#888', fontSize: 18 }}>
@@ -153,12 +185,19 @@ export default function Cadastro({ navigation }) {
                             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                             onChange={onChangeDate}
                             maximumDate={new Date()}
-                            locale="pt-BR"  // <-- Aqui o locale PT-BR
+                            locale="pt-BR"
                         />
-
                     )}
 
-                    <TextInput placeholder="CEP" value={cep} onChangeText={setCep} style={styles.input} />
+
+                    <TextInput
+                        placeholder="CEP (Apenas números)"
+                        keyboardType="numeric"
+                        value={cep}
+                        onChangeText={setCep}
+                        maxLength={8}
+                        style={styles.input}
+                    />
 
                     {tipo === '2' && (
                         <TextInput placeholder="Nome da marca (Opcional)" value={nomeMarca} onChangeText={setNomeMarca} style={styles.input} />
@@ -181,6 +220,7 @@ export default function Cadastro({ navigation }) {
         </ImageBackground>
     );
 }
+
 
 const styles = StyleSheet.create({
     background: {
@@ -297,7 +337,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     linkLogin: {
-        marginTop: 10,
         color: '#007BFF',
         textDecorationLine: 'underline',
     },
