@@ -9,6 +9,7 @@ import {
     Alert,
     ImageBackground
 } from 'react-native';
+import config from '../config';
 
 // Altere o caminho das imagens conforme sua pasta local do projeto
 const BACKGROUND_IMAGE = require('../assets/imagens/background2.png');
@@ -28,7 +29,7 @@ export default function LoginScreen({ navigation }) {
             return;
         }
         try {
-            const resposta = await fetch('http://10.92.3.172:5000/login', {
+            const resposta = await fetch('${config.IP_LOCAL}/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, senha })
