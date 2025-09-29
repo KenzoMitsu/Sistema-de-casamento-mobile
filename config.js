@@ -1,5 +1,5 @@
 // config.js
-const IP_LOCAL = "http://10.92.3.172:5000";
+const IP_LOCAL = "http://192.168.1.136:5000";
 
 export default {
     IP_LOCAL,
