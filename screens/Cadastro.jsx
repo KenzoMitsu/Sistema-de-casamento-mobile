@@ -263,10 +263,10 @@ const styles = StyleSheet.create({
         right: 20,
     },
     tiposContainer: {
-        flexDirection: 'row',
-        marginBottom: 20,
+        flexDirection: 'column',
         justifyContent: 'space-around',
-        width: '100%'
+        width: 350,
+        gap: 10
     },
     tipoBotao: {
         borderWidth: 1,
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     input: {
-        width: '88%',
+        width: 350,
         height: 48,
         borderColor: 'black',
         borderWidth: 1,
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     senhaContainer: {
-        width: '88%',
+        width: 350,
         flexDirection: 'row',
         alignItems: 'center',
         borderColor: 'black',
