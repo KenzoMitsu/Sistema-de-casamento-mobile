@@ -170,7 +170,6 @@ export default function Cadastro({ navigation }) {
                     />
 
 
-
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.input, styles.datePickerTouchable]}>
                         <Text style={{ color: dataNascimento ? 'black' : '#888', fontSize: 18 }}>
                             {dataNascimento ? dataNascimento.toLocaleDateString('pt-BR') : 'Data de nascimento'}
