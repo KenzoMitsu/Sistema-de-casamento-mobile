@@ -8,84 +8,88 @@ import {
     ScrollView,
     TextInput,
     ImageBackground,
+    Dimensions,
 } from 'react-native';
 
-// Ícones podem ser SVGs ou imagens. Usei placeholders.
-// Recomendo a biblioteca 'react-native-svg' para os ícones de busca.
 const SearchIcon = () => <Text style={styles.icon}>🔍</Text>;
 const FilterIcon = () => <Text style={styles.icon}>📊</Text>;
 
 // Componente da tela
 export default function VisitanteScreen({ navigation }) {
-
-    // Função para navegar para a tela de Login
     const irParaLogin = () => {
         navigation.navigate('Login');
     };
 
+    // --- CORREÇÃO 1: O Header agora é um componente separado para clareza ---
+    const Header = () => (
+        <View style={styles.header}>
+            <View style={styles.headerContainer}>
+                <Image source={require('../assets/imagens/logo-branca.png')} style={styles.logoImg} />
+                <TouchableOpacity style={styles.loginButton} onPress={irParaLogin}>
+                    <Text style={styles.loginButtonText}>Login</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+
     return (
-        <ScrollView style={styles.container}>
-            {/* Seção Hero */}
-            <ImageBackground
-                source={require('../assets/imagens/hero-background.jpg')} // Coloque sua imagem de fundo aqui
-                style={styles.heroSection}
-                resizeMode="cover"
-            >
-                <View style={styles.header}>
-                    <Image source={require('../assets/imagens/logo-branca.png')} style={styles.logoImg} />
-                    <View style={styles.navbar}>
-                        <TouchableOpacity onPress={irParaLogin}>
-                            <Text style={styles.loginButtonText}>Login</Text>
+        // --- CORREÇÃO 2: Estrutura principal com um View raiz ---
+        <View style={styles.container}>
+            <Header />
+            <ScrollView>
+                {/* A ScrollView agora contém todo o conteúdo que rola */}
+                <ImageBackground
+                    source={require('../assets/imagens/hero-background.jpg')}
+                    style={styles.heroSection}
+                    resizeMode="cover"
+                >
+                    {/* O Header foi removido daqui */}
+                    <View style={styles.heroContent}>
+                        <Text style={styles.heroSubtitle}>SEU SONHO</Text>
+                        <Text style={styles.heroTitle}>Começa Aqui!</Text>
+                        <TouchableOpacity style={styles.heroButton}>
+                            <Text style={styles.heroButtonText}>CERIMONIALISTA</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
 
-                <View style={styles.heroContent}>
-                    <Text style={styles.heroSubtitle}>SEU SONHO</Text>
-                    <Text style={styles.heroTitle}>Começa Aqui!</Text>
-                    <TouchableOpacity style={styles.heroButton}>
-                        <Text style={styles.heroButtonText}>CERIMONIALISTA</Text>
-                    </TouchableOpacity>
-                </View>
+                    <View style={styles.searchBarContainer}>
+                        <View style={styles.searchBar}>
+                            <SearchIcon />
+                            <TextInput style={styles.searchInput} placeholder="Pesquisar" placeholderTextColor="#888" />
+                            <FilterIcon />
+                        </View>
+                    </View>
+                </ImageBackground>
 
-                <View style={styles.searchBarContainer}>
-                    <View style={styles.searchBar}>
-                        <SearchIcon />
-                        <TextInput style={styles.searchInput} placeholder="Pesquisar" placeholderTextColor="#888" />
-                        <FilterIcon />
+                {/* Seção Features */}
+                <View style={styles.featuresSection}>
+                    <Image source={require('../assets/imagens/logo-bege.png')} style={styles.logoBege} />
+                    <View style={styles.featuresGrid}>
+                        <FeatureItem
+                            icon={require('../assets/imagens/caderneta.png')}
+                            title="PLANEJAMENTO"
+                            description="Planeje o seu casamento, organizando as tarefas e o que será necessário."
+                        />
+                        <FeatureItem
+                            icon={require('../assets/imagens/aliancas.png')}
+                            title="CERIMONIALISTA"
+                            description="Contacte cerimonialistas disponíveis em sua região."
+                        />
+                        <FeatureItem
+                            icon={require('../assets/imagens/tacas.png')}
+                            title="COMEMORAÇÃO"
+                            description="Celebre esse dia tão especial da melhor maneira possível."
+                        />
                     </View>
                 </View>
-            </ImageBackground>
-
-            {/* Seção Features */}
-            <View style={styles.featuresSection}>
-                <Image source={require('../assets/imagens/logo-bege.png')} style={styles.logoBege} />
-                <View style={styles.featuresGrid}>
-                    <FeatureItem
-                        icon={require('../assets/imagens/caderneta.png')}
-                        title="PLANEJAMENTO"
-                        description="Planeje o seu casamento, organizando as tarefas e o que será necessário."
-                    />
-                    <FeatureItem
-                        icon={require('../assets/imagens/aliancas.png')}
-                        title="CERIMONIALISTA"
-                        description="Contacte cerimonialistas disponíveis em sua região."
-                    />
-                    <FeatureItem
-                        icon={require('../assets/imagens/tacas.png')}
-                        title="COMEMORAÇÃO"
-                        description="Celebre esse dia tão especial da melhor maneira possível."
-                    />
-                </View>
-            </View>
-
-            {/* Outras seções como Destaques e Jornada podem ser adicionadas aqui de forma similar */}
-
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
 }
 
-// Componente auxiliar para os itens de features
+// O resto do seu código (FeatureItem e StyleSheet) permanece o mesmo,
+// mas adicionei/ajustei alguns estilos.
+
 const FeatureItem = ({ icon, title, description }) => (
     <View style={styles.featureItem}>
         <View style={styles.featureIconContainer}>
@@ -96,125 +100,172 @@ const FeatureItem = ({ icon, title, description }) => (
     </View>
 );
 
+const { width, height } = Dimensions.get('window');
 
-// Estilos
+// --- CORREÇÃO 3: Ajustes nos Estilos ---
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFF',
+        backgroundColor: '#F3F2EE',
     },
-    heroSection: {
-        // A altura pode ser ajustada
-        paddingBottom: 20,
-    },
+    // --- CABEÇALHO (HEADER) ---
     header: {
+        // Agora o header fica posicionado corretamente no topo da tela
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(255, 183, 201, 0.75)',
+        zIndex: 1000,
+        paddingTop: 40, // Espaço seguro para a status bar do celular
+    },
+    headerContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 40, // Espaço para a status bar
     },
     logoImg: {
-        width: 120,
-        height: 40,
+        height: 50,
+        width: 140,
         resizeMode: 'contain',
     },
-    navbar: {
-        // No mobile, geralmente não temos uma lista de links,
-        // mas um botão de login direto ou um menu hambúrguer.
+    loginButton: {
+        backgroundColor: '#FF87A5',
+        paddingVertical: 10,
+        paddingHorizontal: 25,
+        borderRadius: 25,
     },
     loginButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-        backgroundColor: '#FFC9D6',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
+        color: '#ffffff',
+        fontWeight: '700',
+    },
+    // --- SEÇÃO HERO ---
+    heroSection: {
+        height: height, // Usar height em vez de minHeight para preencher a tela
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: '6%',
+        paddingTop: 80, // Adicionado para não ficar atrás do header
     },
     heroContent: {
-        alignItems: 'center',
-        marginTop: 60,
+        alignItems: 'flex-start',
+        width: '100%',
     },
     heroSubtitle: {
+        fontSize: 24,
+        fontWeight: '500',
         color: 'white',
-        fontSize: 18,
-        fontFamily: 'Luxurious Script', // Verifique se a fonte está instalada no projeto
+        letterSpacing: 1,
+        marginBottom: 20,
+        fontFamily: 'Old Standard TT',
     },
     heroTitle: {
+        fontFamily: 'Great Vibes',
+        fontSize: 80,
+        fontWeight: '400',
+        lineHeight: 80,
         color: 'white',
-        fontSize: 48,
-        fontWeight: 'bold',
-        fontFamily: 'Great Vibes', // Verifique se a fonte está instalada no projeto
+        marginTop: -10,
     },
     heroButton: {
-        backgroundColor: '#FFC9D6',
+        backgroundColor: 'rgba(255, 183, 201, 0.75)',
         paddingVertical: 12,
         paddingHorizontal: 30,
-        borderRadius: 25,
         marginTop: 20,
+        borderRadius: 4,
     },
     heroButtonText: {
         color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: '500',
+        fontSize: 20,
+        fontFamily: 'Old Standard TT',
     },
+
+    // --- BARRA DE PESQUISA ---
     searchBarContainer: {
+        position: 'absolute',
+        bottom: 50,
+        width: '100%',
         paddingHorizontal: 20,
-        marginTop: 40,
     },
     searchBar: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: 25,
-        paddingHorizontal: 15,
-        height: 50,
+        backgroundColor: '#ffffff',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        width: '100%',
+        alignSelf: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 15,
     },
     searchInput: {
         flex: 1,
-        marginLeft: 10,
         fontSize: 16,
+        color: '#555',
+        marginHorizontal: 15,
+        paddingVertical: 0,
     },
     icon: {
-        fontSize: 20,
+        fontSize: 24,
+        color: '#777',
     },
+
+    // --- SEÇÃO FEATURES ---
     featuresSection: {
-        padding: 20,
+        paddingVertical: 80,
+        paddingHorizontal: '8%',
+        backgroundColor: '#EEECE1',
         alignItems: 'center',
     },
     logoBege: {
-        width: 150,
-        height: 75,
+        width: '100%',
+        maxWidth: 450,
+        height: 100,
         resizeMode: 'contain',
-        marginBottom: 20,
+        marginBottom: 10,
     },
     featuresGrid: {
         width: '100%',
+        alignItems: 'center',
+        marginTop: 40,
+        gap: 40,
     },
     featureItem: {
         alignItems: 'center',
-        marginBottom: 30,
+        maxWidth: 230,
     },
     featureIconContainer: {
-        backgroundColor: '#F4F2EE',
-        padding: 15,
-        borderRadius: 50,
-        marginBottom: 10,
+        width: 100,
+        height: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     featureIcon: {
-        width: 40,
-        height: 40,
+        width: 130,
+        height: 130,
         resizeMode: 'contain',
     },
     featureTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 5,
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#BB9245',
+        marginVertical: 15,
+        letterSpacing: 1,
+        fontFamily: 'Old Standard TT',
     },
     featureDescription: {
-        fontSize: 14,
+        fontSize: 18,
+        color: '#BB9245',
+        lineHeight: 27,
         textAlign: 'center',
-        color: '#666',
+        fontFamily: 'Old Standard TT',
     },
 });
