@@ -146,7 +146,7 @@ export default function Cadastro({ navigation }) {
 
                     <View style={styles.senhaContainer}>
                         <TextInput
-                            placeholder="Senha (Mín. 8 caracteres, 1 maiúsculo, 1 especial)"
+                            placeholder="Senha"
                             secureTextEntry={!mostrarSenha}
                             value={senha}
                             onChangeText={setSenha}
@@ -161,7 +161,7 @@ export default function Cadastro({ navigation }) {
                     </View>
 
                     <TextInput
-                        placeholder="Telefone (DDD + Número, apenas números)"
+                        placeholder="Telefone"
                         keyboardType="phone-pad"
                         value={telefone}
                         onChangeText={setTelefone}
@@ -302,13 +302,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     senhaContainer: {
-        width: 350,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderColor: 'black',
-        borderWidth: 1,
-        borderRadius: 3,
-        backgroundColor: '#F4F2EE',
+            width: 350,
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderColor: 'black',
+            borderWidth: 1,
+            borderRadius: 3,
+            backgroundColor: '#F4F2EE',
     },
     inputSenha: {
         flex: 1,
