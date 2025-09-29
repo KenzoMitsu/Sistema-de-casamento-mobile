@@ -32,6 +32,7 @@ export default function Cadastro({ navigation }) {
     const validarTelefone = (tel) => /^\d{10,11}$/.test(tel.replace(/\D/g, ''));
 
     const validarSenha = (senha) => /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}":;'?/>,.<]).{8,}$/.test(senha);
+
     const validarCEP = (cep) => /^\d{8}$/.test(cep.replace(/\D/g, ''));
 
 
@@ -41,7 +42,7 @@ export default function Cadastro({ navigation }) {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
-        return `${year}-${month}-${day}`;
+        return `${day}-${month}-${year}`;
     };
 
     const onChangeDate = (event, selectedDate) => {
@@ -56,10 +57,6 @@ export default function Cadastro({ navigation }) {
         const telLimpo = telefone.replace(/\D/g, '');
         const cepLimpo = cep.replace(/\D/g, '');
 
-
-        if (!nome.trim() || !email.trim() || !senha.trim() || !telLimpo || !dataNascimento || !cepLimpo) {
-            return Alert.alert('Erro', 'Todos os campos obrigatórios devem ser preenchidos!');
-        }
 
 
         if (!validarEmail(email.trim())) {
@@ -94,6 +91,7 @@ export default function Cadastro({ navigation }) {
             cargo
         };
 
+        console.log(dados)
 
         try {
             const resposta = await fetch(`${config.IP_LOCAL}/usuario`, {
