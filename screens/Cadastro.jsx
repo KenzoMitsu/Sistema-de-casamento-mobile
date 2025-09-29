@@ -14,7 +14,7 @@ const tiposUsuarios = [
 
 
 export default function Cadastro({ navigation }) {
-    // --- States ---
+
     const [tipo, setTipo] = useState('1');
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
@@ -160,7 +160,6 @@ export default function Cadastro({ navigation }) {
                         </TouchableOpacity>
                     </View>
 
-
                     <TextInput
                         placeholder="Telefone (DDD + Número, apenas números)"
                         keyboardType="phone-pad"
@@ -169,6 +168,8 @@ export default function Cadastro({ navigation }) {
                         maxLength={11}
                         style={styles.input}
                     />
+
+
 
                     <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.input, styles.datePickerTouchable]}>
                         <Text style={{ color: dataNascimento ? 'black' : '#888', fontSize: 18 }}>
@@ -261,10 +262,10 @@ const styles = StyleSheet.create({
         right: 20,
     },
     tiposContainer: {
-        flexDirection: 'row',
-        marginBottom: 20,
+        flexDirection: 'column',
         justifyContent: 'space-around',
-        width: '100%'
+        width: 350,
+        gap: 10
     },
     tipoBotao: {
         borderWidth: 1,
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     input: {
-        width: '88%',
+        width: 350,
         height: 48,
         borderColor: 'black',
         borderWidth: 1,
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     senhaContainer: {
-        width: '88%',
+        width: 350,
         flexDirection: 'row',
         alignItems: 'center',
         borderColor: 'black',

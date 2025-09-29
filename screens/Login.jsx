@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import config from '../config';
 
-// Altere o caminho das imagens conforme sua pasta local do projeto
+
 const BACKGROUND_IMAGE = require('../assets/imagens/background2.png');
 const LOGO_IMAGE = require('../assets/imagens/logoicon.png');
 const EYE_OPEN = { uri: "https://cdn-icons-png.flaticon.com/512/2767/2767149.png" };
@@ -21,7 +21,7 @@ export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
-    // Substitua abaixo pelos caminhos das suas imagens no projeto
+
 
     const handleLogin = async () => {
         if (!email || !senha) {
@@ -41,13 +41,12 @@ export default function LoginScreen({ navigation }) {
                 Alert.alert('Erro!', 'Não foi possível recuperar os dados do usuário.');
                 return;
             }
-            // Salvar usuário no asyncStorage se quiser persistência
-            // AsyncStorage.setItem('token', usuario.token);
+
 
             Alert.alert('Login bem-sucedido!');
-            // Troque a navegação conforme a sua estrutura do app
+
             if (usuario.tipo === 'adm') {
-                navigation.navigate('HomeAdmin'); // ou use navigation.replace(...)
+                navigation.navigate('HomeAdmin');
             } else {
                 navigation.navigate('HomeLogado');
             }
@@ -55,6 +54,7 @@ export default function LoginScreen({ navigation }) {
             Alert.alert('Erro!', erro.message || 'Erro ao tentar fazer login.');
         }
     };
+
 
     return (
         <ImageBackground
@@ -116,13 +116,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     formulario: {
-        width: 400,        // aumentei de 340 para 400
+        width: 400,
         alignSelf: 'center',
         backgroundColor: 'white',
         borderRadius: 10,
         alignItems: 'center',
-        paddingVertical: 32,  // aumentei o padding vertical
-        paddingHorizontal: 24, // aumentei o padding horizontal
+        paddingVertical: 32,
+        paddingHorizontal: 24,
         gap: 20,
         elevation: 6, // sombra (Android)
         shadowColor: '#000', // sombra (iOS)
