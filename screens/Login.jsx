@@ -18,8 +18,6 @@ const EYE_OPEN = { uri: "https://cdn-icons-png.flaticon.com/512/2767/2767149.png
 const EYE_CLOSED = { uri: "https://cdn-icons-png.flaticon.com/512/2767/2767146.png" };
 
 export default function LoginScreen({ navigation }) {
-
-    //armazena dados digitados pelo usuario
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -31,12 +29,7 @@ export default function LoginScreen({ navigation }) {
             return;
         }
         try {
-
-            // é a requisição do POST para a API com email e senha
-            const resposta = await fetch('${config.IP_LOCAL}/login', {
-
             const resposta = await fetch(`${config.IP_LOCAL}/login`, {
-
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, senha })
@@ -140,7 +133,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 10,
-        },
+    },
 
     titulo: {
         fontFamily: 'serif',
