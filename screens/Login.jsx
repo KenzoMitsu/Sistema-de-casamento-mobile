@@ -51,7 +51,7 @@ export default function LoginScreen({ navigation }) {
             // Redirecione para sua tela Home principal (mude para sua rota adequada)
             navigation.reset({ // Garante que o usuário não volte para login com "voltar"
                 index: 0,
-                routes: [{ name: 'HomeLogado' }],
+                routes: [{ name: 'Home' }],
             });
 
         } catch (erro) {

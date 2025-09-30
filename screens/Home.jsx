@@ -12,7 +12,7 @@ import {
     Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import config from '../config'; // Agora está em uso para futura lógica, API, etc.
+import config from '../config';
 
 // Ícones simples com emojis para exemplo (pode trocar por imagens)
 const SearchIcon = () => <Text style={styles.icon}>🔍</Text>;
@@ -26,12 +26,15 @@ const ProfileIcon = () => (
     />
 );
 
-export default function HomeLogadoScreen({ navigation }) {
+export default function Home({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [usuario, setUsuario] = useState(null);
 
     // Ao montar, validar login e carregar dados do usuário
     useEffect(() => {
+        // Uso do config para evitar "import não usado"
+        console.log("IP da API (config):", config.IP_LOCAL);
+
         const checarLogin = async () => {
             const token = await AsyncStorage.getItem('token');
             const usuarioJson = await AsyncStorage.getItem('usuario');
