@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -9,41 +9,96 @@ import {
     TextInput,
     ImageBackground,
     Dimensions,
+    Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../config'; // Agora está em uso para futura lógica, API, etc.
 
+// Ícones simples com emojis para exemplo (pode trocar por imagens)
 const SearchIcon = () => <Text style={styles.icon}>🔍</Text>;
-const FilterIcon = () => <Text style={styles.icon}>📊</Text>;
+const FilterIcon = () => <Text style={styles.icon}>⍙</Text>;
 
-// Componente da tela
-export default function VisitanteScreen({ navigation }) {
-    const irParaLogin = () => {
-        navigation.navigate('Login');
+// Ícone de perfil usado no header
+const ProfileIcon = () => (
+    <Image
+        source={require('../assets/imagens/perfil.png')}
+        style={styles.profileIcon}
+    />
+);
+
+export default function HomeLogadoScreen({ navigation }) {
+    const [modalVisible, setModalVisible] = useState(false);
+    const [usuario, setUsuario] = useState(null);
+
+    // Ao montar, validar login e carregar dados do usuário
+    useEffect(() => {
+        const checarLogin = async () => {
+            const token = await AsyncStorage.getItem('token');
+            const usuarioJson = await AsyncStorage.getItem('usuario');
+
+            if (!token || !usuarioJson) {
+                // Redireciona para login se não estiver autenticado
+                navigation.replace('Login');
+                return;
+            }
+
+            setUsuario(JSON.parse(usuarioJson));
+        };
+
+        checarLogin();
+    }, []);
+
+    const abrirModal = () => setModalVisible(true);
+    const fecharModal = () => setModalVisible(false);
+
+    const fazerLogout = async () => {
+        await AsyncStorage.clear();
+        fecharModal();
+        navigation.replace('Login');
     };
 
-    // --- CORREÇÃO 1: O Header agora é um componente separado para clareza ---
-    const Header = () => (
-        <View style={styles.header}>
-            <View style={styles.headerContainer}>
-                <Image source={require('../assets/imagens/logo-branca.png')} style={styles.logoImg} />
-                <TouchableOpacity style={styles.loginButton} onPress={irParaLogin}>
-                    <Text style={styles.loginButtonText}>Login</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-
     return (
-        // --- CORREÇÃO 2: Estrutura principal com um View raiz ---
         <View style={styles.container}>
-            <Header />
+            {/* Header com logo e ícone de perfil */}
+            <View style={styles.header}>
+                <View style={styles.headerContainer}>
+                    <Image
+                        source={require('../assets/imagens/logo-branca.png')}
+                        style={styles.logoImg}
+                    />
+                    <TouchableOpacity onPress={abrirModal}>
+                        <ProfileIcon />
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Modal para opções do perfil */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={fecharModal}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPressOut={fecharModal}
+                >
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Opções da Conta</Text>
+                        <TouchableOpacity onPress={fazerLogout} style={styles.logoutButton}>
+                            <Text style={styles.logoutText}>Sair da Conta</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
             <ScrollView>
-                {/* A ScrollView agora contém todo o conteúdo que rola */}
                 <ImageBackground
                     source={require('../assets/imagens/background.png')}
                     style={styles.heroSection}
                     resizeMode="cover"
                 >
-                    {/* O Header foi removido daqui */}
                     <View style={styles.heroContent}>
                         <Text style={styles.heroSubtitle}>SEU SONHO</Text>
                         <Text style={styles.heroTitle}>Começa Aqui!</Text>
@@ -55,7 +110,11 @@ export default function VisitanteScreen({ navigation }) {
                     <View style={styles.searchBarContainer}>
                         <View style={styles.searchBar}>
                             <SearchIcon />
-                            <TextInput style={styles.searchInput} placeholder="Pesquisar" placeholderTextColor="#888" />
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder="Pesquisar"
+                                placeholderTextColor="#888"
+                            />
                             <FilterIcon />
                         </View>
                     </View>
@@ -63,7 +122,10 @@ export default function VisitanteScreen({ navigation }) {
 
                 {/* Seção Features */}
                 <View style={styles.featuresSection}>
-                    <Image source={require('../assets/imagens/logo-bege.png')} style={styles.logoBege} />
+                    <Image
+                        source={require('../assets/imagens/logo-bege.png')}
+                        style={styles.logoBege}
+                    />
                     <View style={styles.featuresGrid}>
                         <FeatureItem
                             icon={require('../assets/imagens/caderneta.png')}
@@ -87,9 +149,6 @@ export default function VisitanteScreen({ navigation }) {
     );
 }
 
-// O resto do seu código (FeatureItem e StyleSheet) permanece o mesmo,
-// mas adicionei/ajustei alguns estilos.
-
 const FeatureItem = ({ icon, title, description }) => (
     <View style={styles.featureItem}>
         <View style={styles.featureIconContainer}>
@@ -102,22 +161,19 @@ const FeatureItem = ({ icon, title, description }) => (
 
 const { width, height } = Dimensions.get('window');
 
-// --- CORREÇÃO 3: Ajustes nos Estilos ---
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F3F2EE',
     },
-    // --- CABEÇALHO (HEADER) ---
     header: {
-        // Agora o header fica posicionado corretamente no topo da tela
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         backgroundColor: 'rgba(255, 183, 201, 0.75)',
         zIndex: 1000,
-        paddingTop: 40, // Espaço seguro para a status bar do celular
+        paddingTop: 40,
     },
     headerContainer: {
         paddingHorizontal: 20,
@@ -131,24 +187,47 @@ const styles = StyleSheet.create({
         width: 140,
         resizeMode: 'contain',
     },
-    loginButton: {
-        backgroundColor: '#FF87A5',
-        paddingVertical: 10,
-        paddingHorizontal: 25,
-        borderRadius: 25,
+    profileIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
     },
-    loginButtonText: {
-        color: '#ffffff',
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: 280,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 20,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 18,
         fontWeight: '700',
+        marginBottom: 15,
     },
-    // --- SEÇÃO HERO ---
+    logoutButton: {
+        backgroundColor: '#d9534f',
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderRadius: 5,
+    },
+    logoutText: {
+        color: 'white',
+        fontWeight: '700',
+        fontSize: 16,
+    },
     heroSection: {
-        height: height, // Usar height em vez de minHeight para preencher a tela
+        height: height,
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: '6%',
-        paddingTop: 80, // Adicionado para não ficar atrás do header
+        paddingTop: 80,
     },
     heroContent: {
         alignItems: 'flex-start',
@@ -183,8 +262,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontFamily: 'Old Standard TT',
     },
-
-    // --- BARRA DE PESQUISA ---
     searchBarContainer: {
         position: 'absolute',
         bottom: 50,
@@ -217,8 +294,6 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#777',
     },
-
-    // --- SEÇÃO FEATURES ---
     featuresSection: {
         paddingVertical: 80,
         paddingHorizontal: '8%',

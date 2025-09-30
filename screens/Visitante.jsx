@@ -45,7 +45,7 @@ export default function VisitanteScreen({ navigation }) {
                 >
                     {/* O Header foi removido daqui */}
                     <View style={styles.heroContent}>
-                        <Text style={styles.heroSubtitle}>SEU SONHO</Text>
+                        <Text style={styles.heroSubtitle}>𝚂𝙴𝚄 𝚂𝙾𝙽𝙷𝙾</Text>
                         <Text style={styles.heroTitle}>Começa Aqui!</Text>
                         <TouchableOpacity style={styles.heroButton}>
                             <Text style={styles.heroButtonText}>CERIMONIALISTA</Text>
