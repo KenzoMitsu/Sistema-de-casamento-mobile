@@ -62,7 +62,6 @@ export default function Home({ navigation }) {
 
     return (
         <View style={styles.container}>
-            {/* Header com logo e ícone de perfil */}
             <View style={styles.header}>
                 <View style={styles.headerContainer}>
                     <Image
@@ -75,7 +74,6 @@ export default function Home({ navigation }) {
                 </View>
             </View>
 
-            {/* Modal para opções do perfil */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -123,7 +121,6 @@ export default function Home({ navigation }) {
                     </View>
                 </ImageBackground>
 
-                {/* Seção Features */}
                 <View style={styles.featuresSection}>
                     <Image
                         source={require('../assets/imagens/logo-bege.png')}

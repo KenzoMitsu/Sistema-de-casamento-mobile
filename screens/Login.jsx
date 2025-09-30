@@ -9,58 +9,66 @@ import {
     Alert,
     ImageBackground
 } from 'react-native';
-import config from '../config';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from '../config';  // Importa configurações como IP da API
+import AsyncStorage from '@react-native-async-storage/async-storage';  // Para armazenar dados localmente
 
+// Imagens usadas na tela
 const BACKGROUND_IMAGE = require('../assets/imagens/background2.png');
 const LOGO_IMAGE = require('../assets/imagens/logoicon.png');
 const EYE_OPEN = { uri: "https://cdn-icons-png.flaticon.com/512/2767/2767149.png" };
 const EYE_CLOSED = { uri: "https://cdn-icons-png.flaticon.com/512/2767/2767146.png" };
 
 export default function LoginScreen({ navigation }) {
+    // Estados para controlar email, senha e mostrar/esconder senha
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
-
+    // Função chamada ao clicar em Entrar
     const handleLogin = async () => {
+        // Verifica se email e senha foram preenchidos
         if (!email || !senha) {
             Alert.alert('Erro!', 'Por favor, preencha todos os campos!');
             return;
         }
+
         try {
+            // Envia requisição POST para o backend de login, passando email e senha
             const resposta = await fetch(`${config.IP_LOCAL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, senha })
             });
+
+            // Recebe a resposta e converte para JSON
             const dados = await resposta.json();
 
-            // Checagem de erro da API
+            // Verifica se houve erro e se foi retornado token
             if (resposta.status !== 200 || !dados.token) {
                 Alert.alert('Erro!', dados.error || 'Não foi possível fazer login.');
                 return;
             }
 
-            // Grava o token (e dados de usuário se quiser)
+            // Armazena token e informações do usuário no AsyncStorage para uso futuro
             await AsyncStorage.setItem('token', dados.token);
             await AsyncStorage.setItem('usuario', JSON.stringify(dados.usuario));
 
             Alert.alert('Login bem-sucedido!');
 
-            // Redirecione para sua tela Home principal (mude para sua rota adequada)
-            navigation.reset({ // Garante que o usuário não volte para login com "voltar"
+            // Redireciona para a tela Home e reseta a stack para não voltar para o login
+            navigation.reset({
                 index: 0,
                 routes: [{ name: 'Home' }],
             });
 
         } catch (erro) {
+            // Se der erro na requisição, exibe alerta
             Alert.alert('Erro!', erro.message || 'Erro ao tentar fazer login.');
         }
     };
 
-
     return (
+        // Fundo da tela com imagem
         <ImageBackground
             source={BACKGROUND_IMAGE}
             style={styles.background}
@@ -68,27 +76,30 @@ export default function LoginScreen({ navigation }) {
         >
             <View style={styles.formulario}>
                 <Text style={styles.titulo}>Login</Text>
+                {/* Logo no canto superior direito */}
                 <Image source={LOGO_IMAGE} style={styles.logoCanto} />
+                {/* Input de email */}
                 <TextInput
                     placeholder="E-mail"
                     value={email}
                     onChangeText={setEmail}
                     style={styles.input}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
+                    autoCapitalize="none"  // Não maiúsculas
+                    keyboardType="email-address"  // Teclado formato email
                 />
                 <View style={styles.senhaContainer}>
+                    {/* Input da senha, com ocultar/mostrar tecla */}
                     <TextInput
                         placeholder="Senha"
                         value={senha}
                         onChangeText={setSenha}
                         style={styles.inputSenha}
-                        secureTextEntry={!mostrarSenha}
+                        secureTextEntry={!mostrarSenha}  // Esconde a senha
                     />
                     <TouchableOpacity
-                        onPress={() => setMostrarSenha(!mostrarSenha)}
+                        onPress={() => setMostrarSenha(!mostrarSenha)}  // Alterna mostrar/esconder
                         style={styles.iconeSenha}
-                        hitSlop={12}
+                        hitSlop={12}  // Espaçamento para facilitar clique
                     >
                         <Image
                             source={mostrarSenha ? EYE_OPEN : EYE_CLOSED}
@@ -97,9 +108,12 @@ export default function LoginScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
+                {/* Botão Entrar que chama a função handleLogin */}
                 <TouchableOpacity style={styles.botaoLogin} onPress={handleLogin}>
                     <Text style={styles.textoBotaoLogin}>Entrar</Text>
                 </TouchableOpacity>
+
+                {/* Texto para navegar para tela Cadastro */}
                 <Text style={styles.cadastro}>
                     Não possui uma conta?{' '}
                     <Text
