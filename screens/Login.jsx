@@ -10,7 +10,7 @@ import {
     ImageBackground
 } from 'react-native';
 import config from '../config';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BACKGROUND_IMAGE = require('../assets/imagens/background2.png');
 const LOGO_IMAGE = require('../assets/imagens/logoicon.png');
@@ -31,28 +31,36 @@ export default function LoginScreen({ navigation }) {
             return;
         }
         try {
+
             // é a requisição do POST para a API com email e senha
             const resposta = await fetch('${config.IP_LOCAL}/login', {
+
+            const resposta = await fetch(`${config.IP_LOCAL}/login`, {
+
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, senha })
             });
             const dados = await resposta.json();
-            const usuario = dados.usuarios || dados.user || dados;
 
-            if (!usuario || !usuario.token) {
-                Alert.alert('Erro!', 'Não foi possível recuperar os dados do usuário.');
+            // Checagem de erro da API
+            if (resposta.status !== 200 || !dados.token) {
+                Alert.alert('Erro!', dados.error || 'Não foi possível fazer login.');
                 return;
             }
 
+            // Grava o token (e dados de usuário se quiser)
+            await AsyncStorage.setItem('token', dados.token);
+            await AsyncStorage.setItem('usuario', JSON.stringify(dados.usuario));
 
             Alert.alert('Login bem-sucedido!');
 
-            if (usuario.tipo === 'adm') {
-                navigation.navigate('HomeAdmin');
-            } else {
-                navigation.navigate('HomeLogado');
-            }
+            // Redirecione para sua tela Home principal (mude para sua rota adequada)
+            navigation.reset({ // Garante que o usuário não volte para login com "voltar"
+                index: 0,
+                routes: [{ name: 'HomeLogado' }],
+            });
+
         } catch (erro) {
             Alert.alert('Erro!', erro.message || 'Erro ao tentar fazer login.');
         }
