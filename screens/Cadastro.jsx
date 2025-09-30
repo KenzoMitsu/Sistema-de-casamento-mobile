@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert, ScrollView, ImageBackground, Platform
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker'; //é um componente do react native que o usuário escolhe a data
 import config from '../config';
 
-
+//tipo de usuário pré-definido
 const tiposUsuarios = [
     { label: 'Noivo(a)', value: '1' },
     { label: 'Fornecedor(a)', value: '2' },
@@ -13,9 +13,9 @@ const tiposUsuarios = [
 ];
 
 
-export default function Cadastro({ navigation }) {
+export default function Cadastro({ navigation }) {  //essa linha ta criando a tela de cadastro, componente exportado do arquivo
 
-    const [tipo, setTipo] = useState('1');
+    const [tipo, setTipo] = useState('1'); //pega o tipo de usuario, tipo começa no 1 que é noivo
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
@@ -27,7 +27,7 @@ export default function Cadastro({ navigation }) {
     const [cep, setCep] = useState('');
     const [categoria, setCategoria] = useState('');
 
-    const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email);
+    const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email); //esse email tem um formato padrão
 
     const validarTelefone = (tel) => /^\d{10,11}$/.test(tel.replace(/\D/g, ''));
 
@@ -46,7 +46,7 @@ export default function Cadastro({ navigation }) {
     };
 
     const onChangeDate = (event, selectedDate) => {
-        setShowDatePicker(Platform.OS === 'ios');
+        setShowDatePicker(Platform.OS === 'ios');  // ele fecha o calendário no Android
         if (selectedDate) {
             setDataNascimento(selectedDate);
         }
@@ -54,7 +54,7 @@ export default function Cadastro({ navigation }) {
 
 
     const handleCadastrar = async () => {
-        const telLimpo = telefone.replace(/\D/g, '');
+        const telLimpo = telefone.replace(/\D/g, ''); // ele remove oque não é numero de telefone e cep
         const cepLimpo = cep.replace(/\D/g, '');
 
 
@@ -111,7 +111,7 @@ export default function Cadastro({ navigation }) {
             }
         } catch (error) {
             console.error(error);
-            Alert.alert('Erro', 'Falha na comunicação com o servidor. Verifique sua conexão ou o IP do servidor.');
+            Alert.alert('Erro', 'Falha na comunicação com o servidor. Verifique sua conexão ou o IP do servidor.'); //caso não conecte no servidor
         }
     };
 
